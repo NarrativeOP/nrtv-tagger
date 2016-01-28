@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>sadf</title>
+
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script>
+      $(document).ready(function () {
+
+        $.ajaxSetup({
+          headers: {Authorization: "PHOTOHACKDAY123" }
+        });
+
+
+      $("#uploadbutton").click(function () {
+        var file = $("#file")[0].files[0];
+        var fr = new FileReader();
+        fr.onload = received;
+        fr.readAsBinaryString(file);
+
+        function received() {
+          $.ajax({
+            method: "POST",
+            url: "https://vision.eyeem.com/photohackday/photos",
+            data: fr.result
+          }).then(function(data) {
+            console.log(data);
+
+            function getIt() {
+              $.get(data.location).then(function (data) {
+                console.log(data);
+                $("#response").text(data);
+              }, function (error) {
+                if (error.status != 404) {
+                  console.error(error);
+                  return;
+                }
+
+                console.log("Retrying");
+                setTimeout(getIt, data.retryAfter * 1000);
+              });
+            }
+
+            setTimeout(getIt, data.retryAfter * 1000);
+
+          }, function() {
+            console.error(arguments);
+          });
+
+        }
+        return false;
+      });
+    });
+    </script>
+  </head>
+  <body>
+    <form enctype="multipart/form-data">
+        <input id="file" name="file" type="file" />
+        <input type="button" id="uploadbutton" value="Upload" />
+    </form>
+    <pre id="responese">
+
+    </pre>
+  </body>
+</html>

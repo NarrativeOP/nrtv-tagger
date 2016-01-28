@@ -1,0 +1,11 @@
+{
+  "name": "nrtv-tagger",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.html",
+  "author": "Anton Amlinger",
+  "license": "MIT",
+  "devDependencies": {
+    "bower": "^1.7.7"
+  }
+}

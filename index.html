@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Narrative&amp;Imagga</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/angular-narrative-api/dist/angular-narrative-api.js"></script>
+    <script src="main.js"></script>
+
+    <link rel="stylesheet" href="main.css"></link>
+  </head>
+  <body ng-app="NarrativeImagga">
+    <div  ng-controller="MainController as main">
+
+      <nav class="main-nav" ng-show="main.auth.token()">
+        <div class="container">
+          <div class="row">
+            <div class="col-xs-2">
+                <span class="avatar"
+                      ng-style="{backgroundImage: 'url('+main.user.avatar.src+')'}">
+                </span>
+            </div>
+            <header class="col-xs-6">
+              <h1>{{main.user.full_name}}</h1>
+              <h4>Effortlessly tag your Moments!</h4>
+            </header>
+            <nav class="col-xs-4">
+              <button class="logout-button pull-right"
+                      ng-click="main.auth.unauth(); main.imaggaAuth.unsetToken();">
+                Logout
+              </button>
+            </nav>
+          </div>
+        </div>
+      </nav>
+
+     <div class="container"
+          ng-hide="main.auth.token()">
+       <div class="row">
+         <div class="jumbotron main-jumbotron">
+           <h1>Hey there!</h1>
+           <p>To start classifying and tagging your Moments, you need to start off by logging in.</p>
+           <p>Go ahead, click the button!</p>
+           <p>
+             <button class="login-button center-block"
+                     ng-click="main.auth.oauthAuthorizationCode()">
+               Login
+             </button>
+          </p>
+         </div>
+       </div>
+     </div>
+
+     <div class="container"
+          ng-show="main.auth.token() && !main.imaggaAuth.hasToken()">
+       <div class="row">
+        <div class="jumbotron main-jumbotron">
+          <h1>Just one thing left!</h1>
+          <p>
+            We use
+            <a href="http://imagga.com">
+              Imagga
+            </a>
+            to classify images and suggest tags for you.
+          </p>
+          <p>
+            Create an account or sign in at
+            <a href="http://imagga.com/">http://imagga.com/</a>
+            and paste your authorization token below.
+            (this can be found on your dashboard page when you log in).
+           </p>
+           <p>
+            <input class="token-input" ng-model="imaggaTokenModel" />
+           </p>
+           <p>
+            Click the button below when you're done.
+          </p>
+          <p>
+            <button class="login-button center-block"
+                    ng-click="main.imaggaAuth.setToken(imaggaTokenModel)">
+               Continue
+            </button>
+          </p>
+         </div>
+       </div>
+     </div>
+
+     <div class="container"
+          ng-show="main.auth.token() && main.imaggaAuth.hasToken()">
+        <div class="moment" ng-repeat="moment in main.moments.results">
+          <div class="row">
+            <div class="col-xs-9">
+              <h4>Moment Cover Photos</h4>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-xs-9">
+              <div class="cover-photos">
+                <div class="cover-photo"
+                     ng-repeat="cover_photo in moment.cover_photos">
+                  <img ng-src="{{cover_photo.renders.smartphone.url}}"
+                       class="photo"/>
+                </div>
+              </div>
+            </div>
+            <div class="classify-controls col-xs-3">
+              <button ng-click="main.imagga(moment)"
+                      ng-if="!moment.imaggaTags.length"
+                      class="nrtv-btn--red check-content">
+                Suggest Caption Tags
+              </button>
+              <button ng-click="main.updateCaption(moment)"
+                      ng-if="moment.imaggaTags.length"
+                      class="nrtv-btn--red update-caption">
+                Update Caption!
+              </button>
+              <button ng-click="main.remove(moment)"
+                      class="nrtv-btn remove-moment">
+                Skip this Moment
+              </button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="info col-xs-3">
+            <h4 class="pull-right caption-label">
+              Suggested new Caption:
+            </h4>
+          </div>
+          <div class="col-xs-9">
+            <div class="new-caption">
+              {{moment.caption}}
+              <span class="applied-tag"
+                    ng-repeat="tag in moment.imaggaTags | filter:{active:true}">
+                #{{tag.tag}}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="info col-xs-12">
+            <h4 class="center">Top tag results:</h4>
+          </div>
+          <div class="info col-xs-12">
+            <button class="tag"
+                    ng-class="tag.active ? 'nrtv-btn--red' : 'nrtv-btn'"
+                    ng-click="tag.active = !tag.active;"
+                    ng-repeat="tag in moment.imaggaTags | limitTo:10">
+              {{tag.tag}} | {{tag.confidence | number:2}}%
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
